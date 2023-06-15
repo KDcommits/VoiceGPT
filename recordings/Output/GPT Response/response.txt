@@ -1,0 +1,1 @@
+Input audio contains '3' words.
