@@ -1,0 +1,21 @@
+.container {
+max-width: 800px;
+margin-top: 80px;
+}
+
+.split-container {
+display: flex;
+height: 300px;
+}
+
+.left {
+flex: 1;
+background-color: #f8f9fa;
+padding: 20px;
+}
+
+.right {
+flex: 1;
+background-color: #e9ecef;
+padding: 20px;
+}

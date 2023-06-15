@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Audio Capture and Download</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+    background-image: url('./static/BG_Image_3.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    }
+    .form-group {
+    max-width: 400px;
+    max-height: 1200px;
+    margin-top: 180px;
+    margin-left: 840px;
+    }
+
+    .split-container {
+    display: flex;
+    height: 200px;
+    }
+
+    .top {
+    flex: 1;
+    padding: 20px;
+    max-width: 300px;
+    max-height: 400px;
+    }
+
+    .btn-primary{
+      margin-top: 20px;
+      margin-bottom: 10px;
+      margin-right: 2px;
+      margin-left: 10px;
+      width: 100px;
+      height: 30px;
+      font-size:.75em;
+    }
+
+    .btn-danger{
+      margin-top: 20px;
+      margin-bottom: 10px;
+      width: 100px;
+      height: 30px;
+      font-size:.75em;
+    }
+
+    #output-text {
+      width: 227px;
+      height: 130px;
+      padding: 10px;
+      font-size: 16px;
+      text-align:center;
+      font-size:.85em;
+      resize: none;
+      background-color: #e9ecef;
+    }
+
+    .play-button {
+      border: none;
+      cursor: pointer;
+      border-radius: 10%;
+      width: 220px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+      margin-right: 10px;
+      margin-left: 5px;
+    }
+
+    .text {
+        font-size:.90em;
+        margin-bottom: 0px;
+    }
+
+    .text-muted {
+        font-size:.65em;;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="form-group">
+    <h1 align="center"></h1>
+    <div class="split-container">
+      <div class="top ">
+        <div class ="shadow p-3 mb-5 bg-white rounded">
+        <h4 class="font-weight-normal" align="center">Voice GPT</h4>
+          <audio class ="play-button" id="audioPlayer" controls></audio>
+          <button class="btn btn-primary btn-sm" id="startBtn">Start Recording</button>
+          <button class="btn btn-danger btn-sm" id="stopBtn" onclick="displayTranscript()" disabled>Stop Recording</button>
+      
+        <p align ="center" class="text font-weight-normal">AI Generated Output</p>
+        <p align ="center" class="text-muted font-weight-normal">Transcripted Input Audio</p>
+        <textarea id="output-text" readonly></textarea>
+        <br>
+        <button type="button" class="btn btn-secondary btn-sm btn-block" id="tts-button" onclick="AudateResponse()" >Listen</button>
+        </div>
+    </div>
+        <script>
+        function displayTranscript() {
+            fetch('/display', {
+              method: 'POST',
+              body: JSON.stringify(),
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+            document.getElementById("output-text").textContent = data;
+            });
+            AudateResponse()
+          }
+
+          function AudateResponse(){
+              fetch('/audate', {
+              method: 'POST',
+              body: JSON.stringify(),
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }).then(response => response.json())
+            .then(data => {
+            if (data.trim() !== '') {
+
+                const ttsButton = document.getElementById('tts-button');
+                ttsButton.addEventListener('click', function() {
+                if (data) {
+                  ttsButton.disabled = true;
+                  const utterance = new SpeechSynthesisUtterance();
+                  console.log(data);
+                  utterance.text = data;
+                  utterance.voice = speechSynthesis.getVoices()[0];
+                  speechSynthesis.speak(utterance);
+                  ttsButton.disabled = false;
+                }
+              });
+            }
+            });
+          }
+        </script>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    // Initialize variables
+    // let blob;
+    let mediaRecorder;
+    let chunks = [];
+    let audioPlayer = document.getElementById('audioPlayer');
+    let startBtn = document.getElementById('startBtn');
+    let stopBtn = document.getElementById('stopBtn');
+    // let downloadLink = document.getElementById('downloadLink');
+
+    // Check if the browser supports MediaRecorder
+    if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function (stream) {
+          // Create a new MediaRecorder instance
+          mediaRecorder = new MediaRecorder(stream);
+
+          // Add event handlers for start and stop recording
+          startBtn.addEventListener('click', startRecording);
+          stopBtn.addEventListener('click', stopRecording);
+
+          // Event handler for data available
+          mediaRecorder.addEventListener('dataavailable', function (e) {
+            chunks.push(e.data);
+          });
+
+        mediaRecorder.addEventListener('stop', function () {
+            let blob = new Blob(chunks, { 'type': 'audio/wav; codecs=MS_PCM' });
+            chunks = [];
+            let audioURL = window.URL.createObjectURL(blob);
+            console.log(audioURL)
+            audioPlayer.src = audioURL;
+            //downloadLink.href = audioURL;
+            //downloadLink.disabled = false;
+            let formData = new FormData();
+            formData.append('data', blob, "data.wav");
+            $.ajax({
+                type: 'POST',
+                url: '/result',
+                data: formData,
+                contentType: false,
+                processData: false
+            });
+          });
+
+        })
+        .catch(function (err) {
+          console.log('The following error occurred: ' + err);
+        });
+    } else {
+      console.log('getUserMedia not supported on your browser!');
+    }
+
+    // Start recording
+    function startRecording() {
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      chunks = [];
+      mediaRecorder.start();
+    }
+
+    // Stop recording
+    function stopRecording() {
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      mediaRecorder.stop();
+    }
+
+  </script>
+</body>
+
+</html>
