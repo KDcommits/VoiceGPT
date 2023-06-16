@@ -4,82 +4,13 @@
 <head>
   <title>Audio Capture and Download</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="static/css/home.css">
   <style>
     body {
-    background-image: url('./static/BG_Image_3.jpg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    }
-    .form-group {
-    max-width: 400px;
-    max-height: 1200px;
-    margin-top: 180px;
-    margin-left: 840px;
-    }
-
-    .split-container {
-    display: flex;
-    height: 200px;
-    }
-
-    .top {
-    flex: 1;
-    padding: 20px;
-    max-width: 300px;
-    max-height: 400px;
-    }
-
-    .btn-primary{
-      margin-top: 20px;
-      margin-bottom: 10px;
-      margin-right: 2px;
-      margin-left: 10px;
-      width: 100px;
-      height: 30px;
-      font-size:.75em;
-    }
-
-    .btn-danger{
-      margin-top: 20px;
-      margin-bottom: 10px;
-      width: 100px;
-      height: 30px;
-      font-size:.75em;
-    }
-
-    #output-text {
-      width: 227px;
-      height: 130px;
-      padding: 10px;
-      font-size: 16px;
-      text-align:center;
-      font-size:.85em;
-      resize: none;
-      background-color: #e9ecef;
-    }
-
-    .play-button {
-      border: none;
-      cursor: pointer;
-      border-radius: 10%;
-      width: 220px;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 20px;
-      margin-right: 10px;
-      margin-left: 5px;
-    }
-
-    .text {
-        font-size:.90em;
-        margin-bottom: 0px;
-    }
-
-    .text-muted {
-        font-size:.65em;;
-    }
+  background-image: url('./static/BG_Image_3.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  }
   </style>
 </head>
 
@@ -101,6 +32,7 @@
         <button type="button" class="btn btn-secondary btn-sm btn-block" id="tts-button" onclick="AudateResponse()" >Listen</button>
         </div>
     </div>
+        <script src="static/scripts/displayTranscriptedAudio.js"></script>
         <script>
         function displayTranscript() {
             fetch('/display', {
@@ -114,7 +46,6 @@
             .then(data => {
             document.getElementById("output-text").textContent = data;
             });
-            AudateResponse()
           }
 
           function AudateResponse(){
